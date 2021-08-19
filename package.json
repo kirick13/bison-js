@@ -11,13 +11,11 @@
 		"url": "git+https://github.com/kirick13/bison-js.git"
 	},
 	"keywords": [
-		"props",
-		"properties",
-		"validate",
-		"validator",
-		"transform",
-		"args",
-		"arguments"
+		"bison",
+		"json",
+		"encode",
+		"decode",
+		"schema"
 	],
 	"author": "Daniil Kirichenko (https://twitter.com/kirickme)",
 	"license": "MIT",
