@@ -117,13 +117,13 @@ const encode = (value) => {
 
 	if (null === value) {
 		append(
-			0b1111,
+			0b0000,
 			4,
 		);
 	}
 	else if ('boolean' === value_type) {
 		append(
-			0b001_0 | Number(value),
+			0b110_0 | Number(value),
 			4,
 		);
 	}
@@ -153,6 +153,9 @@ const encode = (value) => {
 	}
 	else if (Array.isArray(value)) {
 		encodeArray(value);
+	}
+	else if (IS_NODEJS_BUFFER_SUPPORTED && Buffer.isBuffer(value)) {
+		encodeBuffer(value);
 	}
 	else if (value instanceof ArrayBuffer) {
 		encodeBuffer(value);
@@ -507,7 +510,7 @@ const encodeString = (value, add_type_id = true) => {
 const encodeArray = (value) => {
 	// ---
 	append(
-		0b1100,
+		0b0010,
 		4,
 	);
 
@@ -516,7 +519,7 @@ const encodeArray = (value) => {
 	}
 
 	append(
-		0b000,
+		0b111,
 		3,
 	);
 };
@@ -526,7 +529,7 @@ const encodeArray = (value) => {
 const encodeHash = (value) => {
 	// ---
 	append(
-		0b1110,
+		0b0001,
 		4,
 	);
 
@@ -536,7 +539,7 @@ const encodeHash = (value) => {
 	}
 
 	append(
-		0b000,
+		0b111,
 		3,
 	);
 };

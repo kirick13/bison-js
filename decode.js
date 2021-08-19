@@ -99,21 +99,21 @@ const getTypeID = () => {
 	// console.log('type_id', type_id.toString(2).slice(1));
 
 	switch (type_id) {
-		// 1 more bit to determine a type
-		// terminator, boolean
-		// buffer, string
-		case 0b1_00:
-		case 0b1_10: {
-			type_id <<= 1;
-			type_id |= read(1);
-		} break;
 		// 2 more bits to determine a type
+		// null, array, typed array, hash
 		// int, uint, float, double
-		// array, typed array, hash, null
-		case 0b1_01:
-		case 0b1_11: {
+		case 0b1_00:
+		case 0b1_01: {
 			type_id <<= 2;
 			type_id |= read(2);
+		} break;
+		// 1 more bit to determine a type
+		// buffer, string
+		// boolean, terminator
+		case 0b1_10:
+		case 0b1_11: {
+			type_id <<= 1;
+			type_id |= read(1);
 		} break;
 		default: break;
 	}
@@ -125,12 +125,18 @@ const decode = () => {
 	const type_id = getTypeID();
 
 	switch (type_id) {
-		// terminator
-		case 0b1_000:
-			return TERMINATOR_VALUE;
-		// boolean
-		case 0b1_001:
-			return 1 === read(1);
+		// null
+		case 0b1_0000:
+			return null;
+		// hash
+		case 0b1_0001:
+			return readHash();
+		// array
+		case 0b1_0010:
+			return readArray();
+		// typed array
+		// case 0b1_0011:
+		// 	return readTypedArray();
 		// int
 		case 0b1_0100:
 			return readInt();
@@ -149,18 +155,12 @@ const decode = () => {
 		// string
 		case 0b1_101:
 			return readString();
-		// array
-		case 0b1_1100:
-			return readArray();
-		// typed array
-		// case 0b1_1101:
-		// 	return readTypedArray();
-		// hash
-		case 0b1_1110:
-			return readHash();
-		// null
-		case 0b1_1111:
-			return null;
+		// boolean
+		case 0b1_110:
+			return 1 === read(1);
+		// terminator
+		case 0b1_111:
+			return TERMINATOR_VALUE;
 		default:
 			throw new Error(`Read error: invalid TypeID "${type_id.toString(2).slice(1)}".`);
 	}

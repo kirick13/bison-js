@@ -4,7 +4,7 @@ const BiSON = require('../main.js');
 
 const string_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_'; // абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
 
-const COMPLEXITY = 3;
+const COMPLEXITY = 4;
 
 const randomBoolean = () => Math.random() < 0.5;
 const randomNumber = (min, max) => Math.floor((Math.random() * (max - min + 1)) + min);

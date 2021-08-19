@@ -2,9 +2,12 @@
 require('./prototype-extensions.js'); // eslint-disable-line import/no-unassigned-import
 const BiSON = require('../main.js');
 
-const data = [
-	'привет мир',
-];
+const data = {
+	hello: 'world',
+	foo: 123456,
+	bar: 2856.004382,
+	baz: Buffer.from([ 0xDE, 0xAD, 0xBE, 0xEF ]),
+};
 console.log('data', data);
 
 const encoded_bison = BiSON.encode(data);
