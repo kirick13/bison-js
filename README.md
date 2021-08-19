@@ -52,17 +52,40 @@ Each type has its specific encoding started with 3- or 4-bits of `TypeID` follow
 Please note that every BISON payload starts with bit `0` indicates that it's a JSON-like payload contains all necessary data to decode it (like TypeIDs and other data headers).
 In future, BISON will support *schemas* (payload's first bit is `1`) that will allow you to cut out TypeID bits, `int` and `uint` subtypes, `buffer`/`string` lengths and much more to save even more data.
 
-### Type `terminator`
-Terminator indicates the end of `array` or `hash`. It's acting like an element of collection, but it's of course virtual.
+### Type `null`
 Bit offset | Bits count | Description
 ------------ | ------------- | -------------
-`0` | `3` | `000` (TypeID)
+`0` | `4` | `0000` (TypeID)
 
-### Type `boolean`
+### Type `hash`
 Bit offset | Bits count | Description
 ------------ | ------------- | -------------
-`0` | `3` | `001` (TypeID)
-`3` | `1` | `0` for `false`<br>`1` for `true`
+`0` | `3` | `0001` (TypeID)
+`4` | `<hash_body_length>` | data; <br> all values until `terminator` value will be appended to current hash
+`4 + <hash_body_length>` | `3` | `111` type `terminator`
+
+Hash's body has it's own format:
+1. `value` of any type (excl. `terminator`)
+2. `key`: it's a `string` with no TypeID bits.
+
+If the value you've read is `terminator`, you don't need to read the key.
+
+### Type `array`
+Bit offset | Bits count | Description
+------------ | ------------- | -------------
+`0` | `3` | `0010` (TypeID)
+`4` | `<array_body_length>` | data; <br> all values until `terminator` value will be appended to the array
+`4 + <array_body_length>` | `3` | `111` type `terminator`
+
+### Type `typed array`
+⚠️ **WARNING**: this type isn't implemented.
+That type has no sense in case of JSON-like encoding due to type checks, but it can help to encode schemas.
+Bit offset | Bits count | Description
+------------ | ------------- | -------------
+`0` | `3` | `0011` (TypeID)
+`4` | `<type_id_length>` | TypeID (3 or 4 bits) of every elements in the array
+`4 + <type_id_length>` | `<uint_length>` | unsigned integer of any subtype, but with no TypeID bits; <br> indicates the count of elements in the array
+`4 + <type_id_length> + <uint_length>` | `<array_body_length>` | data <br> all values will be appended to the array <br> no value has TypeID bits
 
 ### Type `int8`
 Bit offset | Bits count | Description
@@ -150,39 +173,15 @@ Bit offset | Bits count | Description
 `4` | `<uint_length>` | unsigned integer of any subtype, but with no TypeID bits; <br> indicates the length of the string in **bytes**
 `4 + <uint_length>` | `<string_bytes_count> * 8` | data
 
-### Type `array`
+### Type `boolean`
 Bit offset | Bits count | Description
 ------------ | ------------- | -------------
-`0` | `3` | `1100` (TypeID)
-`4` | `<array_body_length>` | data; <br> all values until `terminator` value will be appended to the array
-`4 + <array_body_length>` | `3` | `000` type `terminator`
+`0` | `3` | `110` (TypeID)
+`3` | `1` | `0` for `false`<br>`1` for `true`
 
-### Type `typed array`
-⚠️ **WARNING**: this type isn't implemented.
-That type has no sense in case of JSON-like encoding due to type checks, but it can help to encode schemas.
+### Type `terminator`
+Terminator indicates the end of `array` or `hash`. It's acting like an element of collection, but it's of course virtual.
 Bit offset | Bits count | Description
 ------------ | ------------- | -------------
-`0` | `3` | `1101` (TypeID)
-`4` | `<type_id_length>` | TypeID (3 or 4 bits) of every elements in the array
-`4 + <type_id_length>` | `<uint_length>` | unsigned integer of any subtype, but with no TypeID bits; <br> indicates the count of elements in the array
-`4 + <type_id_length> + <uint_length>` | `<array_body_length>` | data <br> all values will be appended to the array <br> no value has TypeID bits
-
-### Type `hash`
-Bit offset | Bits count | Description
------------- | ------------- | -------------
-`0` | `3` | `1110` (TypeID)
-`4` | `<hash_body_length>` | data; <br> all values until `terminator` value will be appended to current hash
-`4 + <hash_body_length>` | `3` | `000` type `terminator`
-
-Hash's body has it's own format:
-1. `value` of any type (excl. `terminator`)
-2. `key`: it's a `string` with no TypeID bits.
-
-If the value you've read is `terminator`, you don't need to read the key.
-
-### Type `null`
-Yep, here must be a `terminator` and `null` should have TypeID `000`... but `array`s and `hash`es are more common than `null`s, so I'm decided to save one more bit.
-Bit offset | Bits count | Description
------------- | ------------- | -------------
-`0` | `4` | `1111` (TypeID)
+`0` | `3` | `111` (TypeID)
 
