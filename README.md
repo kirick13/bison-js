@@ -30,7 +30,7 @@ const payload = BISON.encode(data);
 /*
 payload now is
 ArrayBuffer {
-  [Uint8Contents]: <75 01 5d db dc 9b 19 00 56 86 56 c6 c6 f5 80 00 78 90 00 36 66 f6 f7 40 a6 50 02 3e 5b 85 62 00 d8 98 5c a0 09 bd 5b 7d de 01 b1 30 bd 00>,
+  [Uint8Contents]: <0d 01 5d db dc 9b 19 00 56 86 56 c6 c6 f5 80 00 78 90 00 36 66 f6 f7 40 a6 50 02 3e 5b 85 62 00 d8 98 5c a0 09 bd 5b 7d de 01 b1 30 bd 70>,
   byteLength: 46
 }
 */
