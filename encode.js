@@ -1,11 +1,22 @@
 
-const {
-	shared_data_view,
-	IS_NODEJS_BUFFER_SUPPORTED,
-} = require('./env');
+const { shared_data_view,
+        IS_NODEJS_BUFFER_SUPPORTED } = require('./env');
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray
-const TYPED_ARRAY_CONSTRUCTORS = new Set([ 'Buffer', 'Int8Array', 'Uint8Array', 'Uint8ClampedArray', 'Int16Array', 'Uint16Array', 'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'BigInt64Array', 'BigUint64Array' ]);
+const TYPED_ARRAY_CONSTRUCTORS = new Set([
+	'Buffer',
+	'Int8Array',
+	'Uint8Array',
+	'Uint8ClampedArray',
+	'Int16Array',
+	'Uint16Array',
+	'Int32Array',
+	'Uint32Array',
+	'Float32Array',
+	'Float64Array',
+	'BigInt64Array',
+	'BigUint64Array',
+]);
 const ASCII_REGEXP = /[^\u{00}-\u{FF}]/u;
 const TEXT_ENCODER = new TextEncoder();
 
@@ -89,11 +100,9 @@ const getArrayBuffer = () => {
 
 	return array_buffer;
 };
-const getBuffer = () => {
-	return Buffer.from(
-		getArrayBuffer(),
-	);
-};
+const getBuffer = () => Buffer.from(
+	getArrayBuffer(),
+);
 
 module.exports = (
 	data,
@@ -171,7 +180,7 @@ const encode = (value) => {
 		throw new Error('Unknown type.');
 	}
 };
-const encodeInt = (value) => { // eslint-disable-line complexity
+const encodeInt = (value) => {
 	const is_bigint = typeof value === 'bigint';
 	if (!is_bigint && value < Number.MIN_SAFE_INTEGER) {
 		throw new Error(`Number ${value} is not safe.`);
@@ -310,13 +319,13 @@ const encodeUint = (value, add_type_id = true) => {
 			// it's an equivalent of:
 			// shared_data_view.setUint32(0, value)
 			// shared_data_view.getInt32(0)
-			Number(value) >> 0, // eslint-disable-line unicorn/prefer-math-trunc
+			Number(value) >> 0,
 			32,
 		);
 	}
 	// uint2048
 	else {
-		const denominator = is_bigint ? 0x1_00_00_00_00n : 0x1_00_00_00_00;
+		const denominator = is_bigint ? 0x1_00_00_00_00n : 0x1_00_00_00_00; // eslint-disable-line unicorn/number-literal-case
 
 		const bytes32 = [];
 		let last_bytes = 0;
@@ -374,20 +383,20 @@ const encodeUint = (value, add_type_id = true) => {
 		}
 	}
 };
-const encodeFloat = (value) => {
-	// --
-	append(
-		0b0110,
-		4,
-	);
+// const encodeFloat = (value) => {
+// 	// --
+// 	append(
+// 		0b0110,
+// 		4,
+// 	);
 
-	shared_data_view.setFloat32(0, value);
+// 	shared_data_view.setFloat32(0, value);
 
-	append(
-		shared_data_view.getInt32(0),
-		32,
-	);
-};
+// 	append(
+// 		shared_data_view.getInt32(0),
+// 		32,
+// 	);
+// };
 const encodeDouble = (value) => {
 	// ---
 	append(

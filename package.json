@@ -1,10 +1,14 @@
 {
 	"name": "@kirick/bison",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Binary JSON implementation.",
+	"publishConfig": {
+		"access": "public",
+		"--tag": "beta"
+	},
 	"main": "main.js",
-	"devDependencies": {
-		"xo": "latest"
+	"engines": {
+		"node": ">=11.0.0"
 	},
 	"repository": {
 		"type": "git",
@@ -22,95 +26,5 @@
 	"bugs": {
 		"url": "https://github.com/kirick13/bison-js/issues"
 	},
-	"homepage": "https://github.com/kirick13/bison-js#readme",
-	"xo": {
-		"rules": {
-			"array-bracket-spacing": [
-				"error",
-				"always",
-				{
-					"arraysInArrays": false,
-					"objectsInArrays": false
-				}
-			],
-			"arrow-parens": "off",
-			"brace-style": [
-				"warn",
-				"stroustrup"
-			],
-			"camelcase": "off",
-			"capitalized-comments": "off",
-			"comma-dangle": [
-				"warn",
-				"always-multiline"
-			],
-			"computed-property-spacing": "off",
-			"func-names": "off",
-			"indent": "off",
-			"max-depth": "off",
-			"new-cap": [
-				"error",
-				{
-					"newIsCap": true,
-					"capIsNew": false
-				}
-			],
-			"no-else-return": "off",
-			"no-else-return": "off",
-			"no-lone-blocks": "off",
-			"no-lonely-if": "off",
-			"no-lonely-if": "off",
-			"no-mixed-spaces-and-tabs": "off",
-			"no-multi-assign": "off",
-			"no-unused-expressions": [
-				"error",
-				{
-					"allowShortCircuit": true
-				}
-			],
-			"no-unused-vars": "warn",
-			"object-curly-spacing": [
-				"error",
-				"always",
-				{
-					"arraysInObjects": false,
-					"objectsInObjects": false
-				}
-			],
-			"padding-line-between-statements": "off",
-			"prefer-const": "warn",
-			"quote-props": "off",
-			"quotes": [
-				"error",
-				"single",
-				{
-					"allowTemplateLiterals": true
-				}
-			],
-			"space-before-blocks": [
-				"error",
-				{
-					"functions": "always",
-					"keywords": "always",
-					"classes": "always"
-				}
-			],
-			"space-before-function-paren": [
-				"error",
-				"always"
-			],
-			"space-infix-ops": "off",
-			"spaced-comment": [
-				"warn"
-			],
-			"strict": [
-				"error",
-				"global"
-			],
-			"yoda": "off",
-			"import/extensions": "off",
-			"unicorn/no-lonely-if": "off",
-			"unicorn/prefer-ternary": "off"
-		}
-	}
+	"homepage": "https://github.com/kirick13/bison-js#readme"
 }

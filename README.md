@@ -1,3 +1,4 @@
+
 # bison-js
 BISON provides a binary JSON implementation with some extentions that JSON doesn't support, e.g. binary buffers, single-precision `Floats` (aka `float32`) and `BigInt`.
 
