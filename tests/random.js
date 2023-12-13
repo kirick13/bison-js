@@ -1,6 +1,7 @@
 
 require('./prototype-extensions.js'); // eslint-disable-line import/no-unassigned-import
 const BiSON = require('../main.js');
+const CBOR = require('cbor-x');
 
 const string_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_'; // абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
 
@@ -26,16 +27,16 @@ const getTimeFromHr = (value) => {
 };
 
 const generators = {
-	boolean () {
+	boolean() {
 		return randomBoolean();
 	},
-	int8 () {
+	int8() {
 		return randomNumber(-128, 127);
 	},
-	int16 () {
+	int16() {
 		return randomNumber(-32_768, 32_767);
 	},
-	int32 () {
+	int32() {
 		return randomNumber(-2_147_483_648, 2_147_483_647);
 	},
 	// int2048 () {
@@ -58,13 +59,13 @@ const generators = {
 	// 		return number;
 	// 	}
 	// },
-	uint8 () {
+	uint8() {
 		return randomNumber(0, 255);
 	},
-	uint16 () {
+	uint16() {
 		return randomNumber(0, 65_535);
 	},
-	uint32 () {
+	uint32() {
 		return randomNumber(0, 4_294_967_295);
 	},
 	// uint2048 () {
@@ -86,17 +87,17 @@ const generators = {
 	// 	);
 	// 	return new DataView(array.buffer).getFloat32(0);
 	// },
-	double () {
+	double() {
 		return Math.random();
 	},
-	buffer () {
+	buffer() {
 		const bytes_count = randomNumber(0, 127);
 		return require('crypto').randomBytes(bytes_count);
 	},
-	string (is_object_key = false) {
+	string(is_object_key = false) {
 		const length = randomNumber(
-			true === is_object_key ? 4 : 0,
-			true === is_object_key ? 16 : 127,
+			is_object_key === true ? 4 : 0,
+			is_object_key === true ? 16 : 127,
 		);
 
 		let string = '';
@@ -105,7 +106,7 @@ const generators = {
 		}
 		return string;
 	},
-	array (level) {
+	array(level) {
 		const array = [];
 
 		const elements_count_max = 2 ** (COMPLEXITY - level);
@@ -122,7 +123,7 @@ const generators = {
 
 		return array;
 	},
-	hash (level) {
+	hash(level) {
 		const result = {};
 
 		const elements_count_max = 2 ** (COMPLEXITY - level);
@@ -131,13 +132,13 @@ const generators = {
 			elements_count_max,
 		);
 
-		for (let i = 0; i < elements_count; i++) {
+		for (let index = 0; index < elements_count; index++) {
 			result[generators.string(true)] = getRandomData(level + 1);
 		}
 
 		return result;
 	},
-	null () {
+	null() {
 		return null;
 	},
 };
@@ -145,7 +146,7 @@ const generators = {
 const generators_names = Object.keys(generators);
 
 const getRandomData = (level = 0) => {
-	if (0 === level) {
+	if (level === 0) {
 		/* if (randomBoolean()) {
 			return generators.hash(level);
 		}
@@ -165,20 +166,25 @@ const getRandomData = (level = 0) => {
 
 let bison_total_length = 0;
 let json_total_length = 0;
+let cbor_total_length = 0;
 
 const timings = {
 	encode: {
 		bison: 0,
 		json: 0,
+		cbor: 0,
 	},
 	decode: {
 		bison: 0,
 		json: 0,
+		cbor: 0,
 	},
 };
 
+const textEncoder = new TextEncoder();
+
 const hrtime_total = process.hrtime();
-for (let i = 0; i < 1_000_000; i++) {
+for (let index = 0; index < 1_000_000; index++) {
 	// console.log('TEST #' + i);
 
 	const data = getRandomData();
@@ -193,8 +199,14 @@ for (let i = 0; i < 1_000_000; i++) {
 	const hrtime_json_encode = process.hrtime();
 	const encoded_json = JSON.stringify(data);
 	timings.encode.json += getTimeFromHr(hrtime_json_encode);
-	const encoded_json_length = new TextEncoder().encode(encoded_json).byteLength;
+	const encoded_json_length = textEncoder.encode(encoded_json).byteLength;
 	json_total_length += encoded_json_length;
+
+	const hrtime_cbor_encode = process.hrtime();
+	const encoded_cbor = CBOR.encode(data);
+	timings.encode.cbor += getTimeFromHr(hrtime_cbor_encode);
+	const encoded_cbor_length = encoded_cbor.byteLength;
+	cbor_total_length += encoded_cbor_length;
 
 	const hrtime_bison_decode = process.hrtime();
 	const data_decoded = BiSON.decode(encoded_bison);
@@ -203,6 +215,10 @@ for (let i = 0; i < 1_000_000; i++) {
 	const hrtime_json_decode = process.hrtime();
 	JSON.parse(encoded_json);
 	timings.decode.json += getTimeFromHr(hrtime_json_decode);
+
+	const hrtime_cbor_decode = process.hrtime();
+	CBOR.decode(encoded_cbor);
+	timings.decode.cbor += getTimeFromHr(hrtime_cbor_decode);
 
 	const encoded_json_after_bison = JSON.stringify(data_decoded);
 	const is_valid = encoded_json === encoded_json_after_bison;
@@ -222,13 +238,36 @@ for (let i = 0; i < 1_000_000; i++) {
 		break;
 	}
 
-	if (getTimeFromHr(hrtime_total) > 10_000) { // 10 seconds
-		console.log(`TEST COMPLETE (${i} runs)`);
+	if (getTimeFromHr(hrtime_total) > 15_000) { // 15 seconds
+		console.log(`TEST COMPLETE (${index} runs)`);
 		break;
 	}
 }
 
+function compareNumbers(number1, number2) {
+	const fraction_percent = Number.parseFloat((number1 / number2 * 100).toFixed(0));
+
+	if (number1 > number2) {
+		return `+${fraction_percent - 100}%`;
+	}
+
+	return `-${100 - fraction_percent}%`;
+}
+
 console.log();
-console.log('efficiency size', Number.parseFloat((json_total_length / bison_total_length).toFixed(2)) + 'x');
-console.log('efficiency time encode', Number.parseFloat((timings.encode.json / timings.encode.bison).toFixed(2)) + 'x');
-console.log('efficiency time decode', Number.parseFloat((timings.decode.json / timings.decode.bison).toFixed(2)) + 'x');
+console.log('Bison compared to JSON:');
+console.log('size', compareNumbers(bison_total_length, json_total_length));
+console.log('time encode', compareNumbers(timings.encode.bison, timings.encode.json));
+console.log('time decode', compareNumbers(timings.decode.bison, timings.decode.json));
+
+console.log();
+console.log('Bison compared to CBOR:');
+console.log('size', compareNumbers(bison_total_length, cbor_total_length));
+console.log('time encode', compareNumbers(timings.encode.bison, timings.encode.cbor));
+console.log('time decode', compareNumbers(timings.decode.bison, timings.decode.cbor));
+
+console.log();
+console.log('CBOR compared to JSON:');
+console.log('size', compareNumbers(cbor_total_length, json_total_length));
+console.log('time encode', compareNumbers(timings.encode.cbor, timings.encode.json));
+console.log('time decode', compareNumbers(timings.decode.cbor, timings.decode.json));
