@@ -2,6 +2,13 @@
 # bison-js
 BISON provides a binary JSON implementation with some extentions that JSON doesn't support, e.g. binary buffers, single-precision `Floats` (aka `float32`) and `BigInt`.
 
+> [!CAUTION]
+> Nowadays we have an RFC-specified [CBOR](https://cbor.io/) that is much more powerful and faster than BISON.
+> 
+> I recommend you to use CBOR instead of BISON, for example, using the library [cbor-x](https://npmjs.com/package/cbor-x), which is faster than JSON itself.
+> 
+> Consider this package as a toy project. This package is **obsolete**, and no longer maintained.
+
 # Size and speed
 BISON output is `30%...40%` smaller than JSON output (buffers encoded as `base64`, `BigInt`s encoded as `String`).
 
